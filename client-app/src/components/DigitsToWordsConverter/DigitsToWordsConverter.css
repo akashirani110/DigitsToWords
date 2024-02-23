@@ -1,0 +1,45 @@
+.input-field {
+	outline: none;
+	font-size: 1.5rem;
+	width: auto;
+	margin-top: 30px;
+	padding: 0.5rem 1rem;
+	box-shadow: none !important;
+	background: transparent !important;
+	width: 50%;
+	border-radius: 0.5rem 0.5rem;
+}
+
+.input-field:focus {
+	outline: none;
+	box-shadow: none;
+	background: transparent;
+}
+
+.dollar-sign {
+	color: #808080 !important;
+	font-size: 24px !important;
+	margin-top: 30px !important;
+	background: transparent !important;
+}
+
+.words {
+	font-size: 36px;
+	margin-top: 20px;
+}
+
+.result-box {
+	background-color: #e0dfdf !important;
+	min-height: 150px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.75rem;
+	border-radius: 0.5rem;
+	word-wrap: break-word;
+}
+
+.error-message {
+	font-size: small;
+	color: #a10606;
+}
