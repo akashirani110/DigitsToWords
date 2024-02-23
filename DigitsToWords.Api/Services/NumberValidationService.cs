@@ -27,6 +27,11 @@
                 return false;
             }
 
+            if (formattedNumber.Length > 14)
+            {
+                return false;
+            }
+
             // Check if all characters are digits or a single decimal point
             return formattedNumber.All(num => char.IsDigit(num) || num == '.');
 

@@ -72,7 +72,7 @@ Response
 
 ### Client App
 
-Enter the number in the input field and you will get the equivalent numeric input converted into currency words.
+Enter the number in the input field and you will get the equivalent numeric input converted into currency words. You can add cents as well and the number of digits (excluding cents) a dollar value can have is 14.
 
 ## Architecture
 
