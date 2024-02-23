@@ -27,7 +27,7 @@
                 return false;
             }
 
-            if (formattedNumber.Length > 14)
+            if (formattedNumber.Length > 15)
             {
                 return false;
             }

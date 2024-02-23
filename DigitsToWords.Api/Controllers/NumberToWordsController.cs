@@ -25,7 +25,7 @@ namespace DigitsToWords.Api.Controllers
                 // Validate the input number string
                 if (!_numberValidationService.IsValidNumber(number, out string formattedNumber))
                 {
-                    return BadRequest(new { error = "Please enter a valid positive number containing only digits" });
+                    return BadRequest(new { error = "Please enter a valid positive number containing less than 15 digits" });
                 }
 
                 // Convert the number to words
