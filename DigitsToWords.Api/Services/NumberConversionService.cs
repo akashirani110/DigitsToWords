@@ -26,66 +26,55 @@ namespace DigitsToWords.Api.Services
             string? cents = dollarsAndCents.Length > 1 ? dollarsAndCents[1] : null;
             
             // Formatted cents with two-digits
-            string limitedCents = CheckCents(cents);
+            string formattedCents = FormatCentsToDisplay(cents);
             // Final result dollars in words
-            List<string> result = new List<string>();
+            List<string> wordsList = new List<string>();
 
             // Check for zero dollars, to directly return "ZERO"
             if (long.Parse(dollars) == 0)
             {
-                result.Add("ZERO");
+                wordsList.Add("ZERO");
             }
             else
             {
-                List<string> chunks = DivideIntoChunks(dollars);
-                List<string> words = new List<string>();
+                List<string> chunks = DivideNumberIntoChunks(dollars);                
                 for (int i = 0; i < chunks.Count; i++)
                 {
                     int chunkIndex = i;
                     string chunk = chunks[i];
-                    // If a chunk starts with '0', modify it by removing the '0'
-                    if (chunk[0] == '0')
-                    {
-                        string modifiedChunk = chunk.Substring(1);
-                        words = DigitToWordMapping(modifiedChunk);
-                    }
-                    else
-                    {
-                        words = DigitToWordMapping(chunk);
-                    }
+                    List<string> numericWords = chunk[0] == '0' ? ConvertDigitToWord(chunk.Substring(1)) : ConvertDigitToWord(chunk);
 
                     // Adding appropriate scale words (e.g., "THOUSAND", "MILLION" ) based on chunk position
-                    if (words.Count > 0)
+                    if (numericWords.Count > 0)
                     {
-                        var suffixAdded = EvaluateSuffix(chunkIndex, words);
-                        string resultWithSpace = String.Join(" ", suffixAdded);
-                        result.Add(resultWithSpace);
+                        var wordsWithScaleSuffix = AddScaleSuffix(chunkIndex, numericWords);
+                        wordsList.Add(String.Join(" ", wordsWithScaleSuffix));
                     }
                 }
             }
 
             // Reverse the result to match the original order
-            result.Reverse();
-            if (result.Count != 0)
+            wordsList.Reverse();
+            if (wordsList.Count != 0)
             {
-                result.Add("DOLLARS");
+                wordsList.Add("DOLLARS");
             }
             
             // Handlling cents, adding "AND" and "CENTS" as necessary
-            if (!string.IsNullOrEmpty(limitedCents))
+            if (!string.IsNullOrEmpty(formattedCents))
             {
-                if (int.Parse(limitedCents) > 0)
+                if (int.Parse(formattedCents) > 0)
                 {
-                    result.Add("AND");
-                    result.Add(AddCentsSuffix(DigitToWordMapping(limitedCents)));
+                    wordsList.Add("AND");
+                    wordsList.Add(AddCentsSuffix(ConvertDigitToWord(formattedCents)));
                 }
                 
             }
-            string finalResult = String.Join(" ", result);
-            // Adjusting spaces around hyphens
-            string adjustedResutl = finalResult.Replace(" - ", "-");
 
-            return adjustedResutl;
+            // Adding space between words and adjusting spaces around hyphens
+            string formattedNumberInWords = String.Join(" ", wordsList).Replace(" - ", "-");
+
+            return formattedNumberInWords;
         }
 
         /*
@@ -93,7 +82,7 @@ namespace DigitsToWords.Api.Services
          * @param numericalString The numerical string to break into chunks
          * @return A list of three-digit (or fewer) chunks, in reverse order for processing
          */
-        private List<string> DivideIntoChunks(string numericalString)
+        private List<string> DivideNumberIntoChunks(string numericalString)
         {
             List<string> chunks = new List<string>();
             // Loop to create chunks of up to three digits, starting from the end of the string
@@ -114,11 +103,11 @@ namespace DigitsToWords.Api.Services
         }
 
         /*
-         * Maps a numeric string chunk to its word representation
+         * Converts a numeric string chunk to its word representation
          * @param chunk A string representing a numeric chunk of up to three digits
          * @return A list of words representing the chunk
          */
-        private List<string> DigitToWordMapping(string chunk)
+        private List<string> ConvertDigitToWord(string chunk)
         {
             List<string> result = new List<string>();
             int lenChunk = chunk.Length;
@@ -135,7 +124,7 @@ namespace DigitsToWords.Api.Services
                 if (firstDigit == 0)
                 {
                     result.Add("AND");
-                    result.AddRange(DigitToWordMapping((remainder).ToString()));
+                    result.AddRange(ConvertDigitToWord((remainder).ToString()));
                 }
                 else
                 {   
@@ -147,7 +136,7 @@ namespace DigitsToWords.Api.Services
                     if (remainder > 0)
                     {
                         result.Add("AND");
-                        result.AddRange(DigitToWordMapping((remainder).ToString()));
+                        result.AddRange(ConvertDigitToWord((remainder).ToString()));
                     }
                     else
                     {
@@ -163,37 +152,30 @@ namespace DigitsToWords.Api.Services
                 string secondWord = "";
                 if (secondDigit == 1)
                 {
-                    if (thirdDigit == 0)
-                    {
-                        secondWord = tens[0].ToUpperInvariant();
-                    }
-                    else
-                    {
-                        secondWord = teens[thirdDigit - 1].ToUpperInvariant();
-                    }
+                    secondWord = thirdDigit == 0 ? tens[0] : teens[thirdDigit - 1];
                     result.Add(secondWord);
                     return result;
                 }
                 else if (secondDigit == 0)
                 {
                     // Directly processing the unit's place if the ten's place is '0'
-                    result.AddRange(DigitToWordMapping((chunkDigits % 10).ToString()));
+                    result.AddRange(ConvertDigitToWord((chunkDigits % 10).ToString()));
                 }
                 else
                 {
                     // Check tens and map tens if the last digit is '0'
                     if (thirdDigit == 0)
                     {
-                        secondWord = tens[secondDigit - 1].ToUpperInvariant();
+                        secondWord = tens[secondDigit - 1];
                         result.Add(secondWord);
                         return result;
                     }
                     else
                     {
-                        secondWord = tens[secondDigit - 1].ToUpperInvariant();
+                        secondWord = tens[secondDigit - 1];
                         result.Add(secondWord);
                         result.Add("-");
-                        result.AddRange(DigitToWordMapping((chunkDigits % 10).ToString()));
+                        result.AddRange(ConvertDigitToWord((chunkDigits % 10).ToString()));
                     }
                 }
             }
@@ -203,7 +185,7 @@ namespace DigitsToWords.Api.Services
                 {
                     // Converting the single digit numbers
                     long thirdDigit = chunkDigits;
-                    string thirdWord = ones[thirdDigit - 1].ToUpperInvariant();
+                    string thirdWord = ones[thirdDigit - 1];
                     result.Add(thirdWord);
                 }
 
@@ -219,9 +201,9 @@ namespace DigitsToWords.Api.Services
          * @param words The list of words representing the chunk, to which the suffix/scale word will be added
          * @return The updated list of words with the suffix/scale word added
          */
-        private List<string> EvaluateSuffix(int chunksIndex, List<string> words)
+        private List<string> AddScaleSuffix(int chunkIndex, List<string> words)
         {
-            switch (chunksIndex)
+            switch (chunkIndex)
             {
                 case 1: 
                     words.Add(thousand);
@@ -245,7 +227,7 @@ namespace DigitsToWords.Api.Services
          * @param cents The cents part of the number as a string
          * @return A two-digit string representation of cents, properly formatted
          */
-        private string CheckCents(string? cents)
+        private string FormatCentsToDisplay(string? cents)
         {
             if (!string.IsNullOrEmpty(cents))
             {
@@ -269,8 +251,8 @@ namespace DigitsToWords.Api.Services
         private string AddCentsSuffix(List<string> words)
         {
             words.Add("CENTS");
-            string resultWithSpace = String.Join(" ", words);
-            return resultWithSpace;
+            string centsInWords = String.Join(" ", words);
+            return centsInWords;
         }
     }
 }
