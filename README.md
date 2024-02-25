@@ -51,7 +51,7 @@ npm install
 - Run the client app by using
 
 ```bash
-npm run
+npm start
 ```
 
 - The client app is listening at port localhost:3000. You can access it at `http://localhost:3000/`
